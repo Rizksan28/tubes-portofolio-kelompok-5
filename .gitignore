@@ -29,7 +29,6 @@ AGENTS.md
 .windsurf/
 
 # Local Figma integration (optional)
-.figma/
 
 # Dependencies and build
 node_modules/
@@ -39,3 +38,9 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Figma build configuration
+.figma/*
+!.figma/make/
+.figma/make/*
+!.figma/make/site.json
