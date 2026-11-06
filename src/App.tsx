@@ -2,20 +2,25 @@ import { useEffect, useState, type MouseEvent, type ReactNode } from "react"
 import { Specializations } from "./components/expertise/Specializations"
 import { ToolsGrid } from "./components/expertise/ToolsGrid"
 import { PharviaCaseStudy } from "./components/pharvia/PharviaCaseStudy"
+import { AmaninCaseStudy } from "./components/amanin/AmaninCaseStudy"
 import { pharviaAssets } from "./data/pharvia"
+import { amaninAssets } from "./data/amanin"
 import { brand } from "./data/brand"
+import { collectiveAchievements, achievementSummary } from "./data/achievements"
 import { MemberProfile } from "./components/profile/MemberProfile"
 import { rizkyProfileData } from "./data/rizky"
 import { vassellProfileData } from "./data/vassell"
+import { evanProfileData } from "./data/evan"
 import type { ProfileData } from "./types/profile"
 
 /** Members with a full personal profile, keyed by slug. Others use the template page. */
 const memberProfiles: Record<string, ProfileData> = {
   rizky: rizkyProfileData,
   vassel: vassellProfileData,
+  evan: evanProfileData,
 }
 
-type Route = "home" | "projects" | "project" | "pharvia" | "team" | "member" | "achievements" | "about"
+type Route = "home" | "projects" | "project" | "pharvia" | "amanin" | "team" | "member" | "achievements" | "about"
 
 type MemberSpirit = {
   name: string
@@ -183,6 +188,31 @@ const showcaseProjects: ShowcaseProject[] = [
     ctaLabel: "Explore case study",
   },
   {
+    id: "amanin",
+    title: "AMANIN",
+    category: "AI-Powered Anti-Scam Decision Assistant",
+    filters: ["AI & Technology", "Mobile App"],
+    description:
+      "An AI-powered digital safety platform that helps Indonesian users identify potential scams before making risky decisions — covering suspicious messages, links, QR codes, and payment information.",
+    quote:
+      "Helping people recognize digital threats before they become victims.",
+    year: "Halte Terminal Rawamangun",
+    tech: [],
+    contributions: ["AI", "Cybersecurity", "FinTech"],
+    contributors: [
+      "Rizky Sandi Pratama",
+      "Vassell Enha Atthayya",
+      "Evan Octavianus Haryo Handoko",
+    ],
+    caseStudyUrl: "/projects/amanin",
+    coverImage: amaninAssets.cover.src,
+    coverAlt:
+      "AMANIN app — five smartphone screens showing the splash screen, home dashboard, Scam Radar, QRIS verification, and suspicious activity scanner.",
+    mockup: "amanin",
+    featured: true,
+    ctaLabel: "Explore case study",
+  },
+  {
     id: "nomori",
     title: "NOMORI",
     category: "Productivity Web & Mobile Application",
@@ -261,6 +291,7 @@ function BrandLogo({ variant = "nav" }: { variant?: "nav" | "footer" }) {
 
 function pathToRoute(pathname: string): Route {
   if (pathname.replace(/\/$/, "") === "/projects/pharvia") return "pharvia"
+  if (pathname.replace(/\/$/, "") === "/projects/amanin") return "amanin"
   if (pathname.startsWith("/projects/")) return "project"
   if (pathname === "/projects") return "projects"
   if (pathname.startsWith("/team/")) return "member"
@@ -335,7 +366,7 @@ function Header({
             className={
               route === key ||
               (key === "projects" &&
-                (route === "project" || route === "pharvia")) ||
+                (route === "project" || route === "pharvia" || route === "amanin")) ||
               (key === "team" && route === "member")
                 ? "active"
                 : ""
@@ -1024,11 +1055,13 @@ function ProjectsPage({
   ]
   const [active, setActive] = useState(categories[0])
   const pharvia = showcaseProjects[0]
+  const amanin = showcaseProjects[1]
   const showPharvia = ["All Projects", "UI / UX Design", "Startup Innovation"].includes(active)
+  const showAmanin = ["All Projects", "AI & Technology", "Startup Innovation"].includes(active)
   const slotCount = projectSlots.filter(
     (p) => active === "All Projects" || p.category === active,
   ).length
-  const total = slotCount + (showPharvia ? 1 : 0)
+  const total = slotCount + (showPharvia ? 1 : 0) + (showAmanin ? 1 : 0)
   return (
     <>
       <InnerHero
@@ -1058,6 +1091,11 @@ function ProjectsPage({
         {showPharvia && (
           <div className="archive__featured">
             <ShowcaseProjectCard project={pharvia} onLink={onLink} />
+          </div>
+        )}
+        {showAmanin && (
+          <div className="archive__featured">
+            <ShowcaseProjectCard project={amanin} onLink={onLink} />
           </div>
         )}
         <div className="projects-grid">
@@ -1373,17 +1411,35 @@ function MemberPage({
   )
 }
 
+function AchievementCrownIcon({ variant }: { variant: "gold" | "silver" | "bronze" }) {
+  const color = variant === "gold" ? "#b58b62" : variant === "silver" ? "#b8b8c5" : "#cd7f32"
+  return (
+    <svg
+      className="ach-entry__crown"
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 22 8 10l8 8 8-8 4 12H4z"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        fill={`${color}20`}
+      />
+      <path d="M3 24h26" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="8" cy="10" r="2" fill={color} />
+      <circle cx="16" cy="18" r="2" fill={color} />
+      <circle cx="24" cy="10" r="2" fill={color} />
+    </svg>
+  )
+}
+
 function AchievementsPage({
   onLink,
 }: {
   onLink: ReturnType<typeof useRouter>["onLink"]
 }) {
-  const milestones = [
-    "Foundation",
-    "First Collaboration",
-    "Project Milestone",
-    "Present Chapter",
-  ]
   return (
     <>
       <InnerHero
@@ -1391,36 +1447,98 @@ function AchievementsPage({
         eyebrow="OUR JOURNEY"
         title="FORGED THROUGH"
         italic="EXPERIENCE."
-        copy="A timeline reserved for the real moments, milestones, and achievements that shaped Kelompok 5."
+        copy="The real moments, milestones, and achievements that shaped Kelompok 5."
       />
-      <main className="section timeline">
-        <div className="timeline__note">
-          No awards or outcomes have been invented. Each milestone below is
-          ready for verified details.
+
+      {/* Achievement summary ticker */}
+      <div className="ach-summary">
+        <div className="ach-summary__stat reveal">
+          <strong>{String(achievementSummary.total).padStart(2, "0")}</strong>
+          <span>Competition Awards</span>
         </div>
-        {milestones.map((title, index) => (
-          <article className="timeline-item" key={title}>
-            <div className="timeline-item__year">
-              20<span>—</span>
-            </div>
-            <i />
-            <div>
-              <span className="eyebrow">MILESTONE / 0{index + 1}</span>
-              <h2>{title}</h2>
-              <p>
-                Add the event name, achievement, related project, and supporting
-                context here.
-              </p>
-              <span className="timeline-item__project">
-                RELATED PROJECT · TO BE CONFIRMED
+        <div className="ach-summary__divider" aria-hidden="true" />
+        <div className="ach-summary__stat reveal" style={{ transitionDelay: "80ms" }}>
+          <strong>{String(achievementSummary.firstPlace).padStart(2, "0")}</strong>
+          <span>First Place</span>
+        </div>
+        <div className="ach-summary__divider" aria-hidden="true" />
+        <div className="ach-summary__stat reveal" style={{ transitionDelay: "160ms" }}>
+          <strong>{String(achievementSummary.secondPlace).padStart(2, "0")}</strong>
+          <span>Second Place</span>
+        </div>
+      </div>
+
+      {/* Achievement timeline */}
+      <main className="ach-timeline">
+        {collectiveAchievements.map((ach, i) => (
+          <article
+            key={ach.id}
+            className={`ach-entry ach-entry--${ach.accentVariant}${i % 2 === 1 ? " ach-entry--flip" : ""}`}
+          >
+            {/* Text */}
+            <div className="ach-entry__text reveal">
+              <span className="ach-entry__milestone">
+                MILESTONE / {String(i + 1).padStart(2, "0")}
               </span>
+              <div className="ach-entry__rank">
+                <AchievementCrownIcon variant={ach.accentVariant} />
+                <strong>{ach.rankDisplay}</strong>
+              </div>
+              <h2 className="ach-entry__title">{ach.project}</h2>
+              <div className="ach-entry__meta">
+                <span>{ach.competition}</span>
+                <span>{ach.event}</span>
+                <span>{ach.organizer}</span>
+                <span>{ach.date}</span>
+              </div>
+              <p className="ach-entry__desc">{ach.description}</p>
+              <p className="ach-entry__team">Team · {ach.team}</p>
+              <a
+                className="ach-entry__cta"
+                href={ach.caseStudyUrl}
+                onClick={onLink(ach.caseStudyUrl)}
+              >
+                Explore {ach.project} <Arrow diagonal />
+              </a>
             </div>
-            <div className={`timeline-item__visual visual-${index + 1}`}>
-              <span>IMAGE PENDING</span>
+
+            {/* Timeline spine */}
+            <div className="ach-spine" aria-hidden="true">
+              <span className="ach-spine__dot" />
+              <span className="ach-spine__line" />
             </div>
+
+            {/* Photo */}
+            <figure className="ach-entry__photo">
+              {ach.image ? (
+                <div className="ach-frame reveal ach-mask">
+                  <img
+                    src={ach.image.src}
+                    width={ach.image.width}
+                    height={ach.image.height}
+                    alt={ach.image.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              ) : (
+                <div className="ach-fallback reveal">
+                  <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" aria-hidden="true">
+                    <path d="M8 36 14 16l10 10 10-10 6 20H8z" />
+                    <path d="M6 38h36" />
+                    <circle cx="14" cy="16" r="3" fill="currentColor" />
+                    <circle cx="24" cy="26" r="3" fill="currentColor" />
+                    <circle cx="34" cy="16" r="3" fill="currentColor" />
+                  </svg>
+                  <p>Award documentation image — place in public/assets/achievements/ when available.</p>
+                </div>
+              )}
+              <figcaption>{ach.imageCaption}</figcaption>
+            </figure>
           </article>
         ))}
       </main>
+
       <ContactCta onLink={onLink} />
     </>
   )
@@ -1551,6 +1669,8 @@ export default function App() {
       <ProjectsPage onLink={onLink} />
     ) : route === "pharvia" ? (
       <PharviaCaseStudy onLink={onLink} />
+    ) : route === "amanin" ? (
+      <AmaninCaseStudy onLink={onLink} />
     ) : route === "project" ? (
       <CaseStudyPage onLink={onLink} />
     ) : route === "team" ? (
